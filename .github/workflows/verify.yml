@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: Apache-2.0
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install ShellCheck and Jujutsu 0.45.1
+        env:
+          JJ_VERSION: 0.45.1
+          JJ_SHA256: f35438350b5d61963aac5dd74ede510b31d6b9690769d1a6268cf058cc825f72
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes shellcheck
+          curl --fail --silent --show-error --location \
+            "https://github.com/jj-vcs/jj/releases/download/v${JJ_VERSION}/jj-v${JJ_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+            --output /tmp/jj.tar.gz
+          echo "${JJ_SHA256}  /tmp/jj.tar.gz" | sha256sum --check
+          tar -xzf /tmp/jj.tar.gz -C /tmp jj
+          sudo install -m 0755 /tmp/jj /usr/local/bin/jj
+          jj version
+      - run: ./scripts/verify.sh

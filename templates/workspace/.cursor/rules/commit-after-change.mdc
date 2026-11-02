@@ -1,0 +1,26 @@
+---
+description: Commit verified changes with the owning repo's Jujutsu policy without waiting to be asked
+alwaysApply: true
+---
+
+# Commit after every verified change
+
+This is a standing request for this package and every other LapisMD package in
+the same workspace. Do not wait for a later "commit" message. The generic
+preference to commit only when asked does not apply here.
+
+After a self-contained, validated slice:
+
+1. Read the owning repository `AGENTS.md` and the `jj-jujutsu` skill.
+2. Run `jj --no-pager st` in every repository that changed.
+3. Commit with Jujutsu (`jj commit -m`) using that repository's message
+   quality. Path-scope with `-- path…` when unrelated dirty files exist.
+   If `jj` is unavailable, use Git with the same quality.
+4. Commit each repository separately. Leave unrelated work uncommitted.
+5. Skip when the working copy is empty or only has secrets, loader
+   symlinks, or generated `spec/book/` output.
+
+```text
+# ✅ GOOD — validated slice, then jj commit in the owning repo
+# ❌ BAD — leave finished work in @ and ask whether to commit
+```
