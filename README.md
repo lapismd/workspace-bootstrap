@@ -33,10 +33,10 @@ Run every command below from `workspace-bootstrap`.
 ./bootstrap.sh
 ```
 
-The default `active` profile contains 22 application, framework, plugin, agent,
-and JJ repositories. The `all` profile contains 30 repositories, adding the
-organization, automation, CI, Homebrew, Nostr, sandbox, and deprecated Terminal
-Host repositories:
+The default `active` profile contains 24 application, maintenance, framework,
+plugin, agent, and JJ repositories. The `all` profile contains 32 repositories,
+adding the organization, automation, CI, Homebrew, Nostr, sandbox, and deprecated
+Terminal Host repositories:
 
 ```sh
 ./bootstrap.sh --profile all
@@ -55,6 +55,10 @@ discovered implicitly. Existing checkouts are accepted when any configured
 GitHub remote identifies the expected repository, whether that remote uses SSH
 or HTTPS and regardless of its name. Existing remotes are never rewritten.
 
+Both profiles include `lapis-maintenance` and `lapis-plugin-terminal`. The
+bootstrap repository itself is the checkout these commands run from and is not
+repeated in the manifest.
+
 Bootstrap installs the portable root templates at `../AGENTS.md` and
 `../.cursor/rules/commit-after-change.mdc`. An existing identical file is
 accepted; a difference fails before any installation or clone. There is no
@@ -63,8 +67,7 @@ the Codex configuration, and app-managed workspace directories are not created.
 
 The following local projects are documented but deliberately excluded because
 they have no hosted clone remote: `jj-desktop`, `jj-checkpoint`, `jj-nostr`,
-`lapis-plugin-terminal`, `lapis-plugin-nostr-sync`, `lapis-website`, and
-`nostr-agent-controller`.
+`lapis-plugin-nostr-sync`, `lapis-website`, and `nostr-agent-controller`.
 
 ## Clean integrated JJ workspaces
 
