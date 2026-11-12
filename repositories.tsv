@@ -3,6 +3,7 @@
 lapismd/lapis-notes	lapis-notes	active,all	main
 lapismd/lapis-desktop	lapis-desktop	active,all	main
 lapismd/lapis-server	lapis-server	active,all	main
+lapismd/lapis-maintenance	lapis-maintenance	active,all	main
 lapismd/mira-mde	mira-mde	active,all	main
 lapismd/design-core	design-core	active,all	main
 lapismd/spec-validator	spec-validator	active,all	main
@@ -18,6 +19,7 @@ lapismd/plugin-registry	nostr-plugin-registry	active,all	main
 lapismd/lapis-plugin-notebook	lapis-plugin-notebook	active,all	main
 lapismd/lapis-plugin-tasks	lapis-plugin-tasks	active,all	main
 lapismd/lapis-plugin-docs	lapis-plugin-docs	active,all	main
+lapismd/lapis-plugin-terminal	lapis-plugin-terminal	active,all	main
 lapismd/lapis-plugin-cv-roles	lapis-plugin-cv-roles	active,all	main
 lapismd/lapis-community	lapis-community	active,all	main
 stevejuma/jj-store	jj-store	active,all	main

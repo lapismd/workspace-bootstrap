@@ -25,6 +25,6 @@ if (cd "$repo_root" && ./cleanup-workspaces.sh --target-root "$target") \
   >"$temporary/missing.out" 2>&1; then
   fail "missing canonical repositories unexpectedly passed"
 fi
-grep -q 'repository_failures=22' "$temporary/missing.out" || fail "missing repository count was not reported"
+grep -q 'repository_failures=24' "$temporary/missing.out" || fail "missing repository count was not reported"
 
 printf 'cleanup boundary tests passed\n'

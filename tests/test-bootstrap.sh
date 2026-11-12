@@ -70,15 +70,22 @@ run_bootstrap() {
 }
 
 list_output=$(cd "$repo_root" && ./bootstrap.sh --list)
+for repository in lapismd/lapis-maintenance lapismd/lapis-plugin-terminal; do
+  printf '%s\n' "$list_output" | awk -F '\t' \
+    -v repository="$repository" -v destination="${repository#*/}" '
+    $1 == repository && $2 == destination && $3 == "active,all" && $4 == "main" { found = 1 }
+    END { exit(!found) }
+  ' || fail "$repository missing from the active profile"
+done
 active_count=$(printf '%s\n' "$list_output" | awk 'NR > 1 { count++ } END { print count + 0 }')
-[ "$active_count" -eq 22 ] || fail "active list count was $active_count"
+[ "$active_count" -eq 24 ] || fail "active list count was $active_count"
 all_count=$(cd "$repo_root" && ./bootstrap.sh --profile all --list | awk 'NR > 1 { count++ } END { print count + 0 }')
-[ "$all_count" -eq 30 ] || fail "all list count was $all_count"
+[ "$all_count" -eq 32 ] || fail "all list count was $all_count"
 
 dry_root=$temporary/dry
 mkdir "$dry_root"
 dry_output=$(run_bootstrap "$dry_root" --dry-run)
-printf '%s\n' "$dry_output" | grep -q 'summary: cloned=22 verified=0 initialized=22 failed=0' ||
+printf '%s\n' "$dry_output" | grep -q 'summary: cloned=24 verified=0 initialized=24 failed=0' ||
   fail "unexpected dry-run summary"
 [ ! -e "$dry_root/lapis-notes" ] || fail "dry run created a checkout"
 [ ! -e "$dry_root/AGENTS.md" ] || fail "dry run installed configuration"
@@ -93,15 +100,20 @@ fresh_root=$temporary/fresh
 mkdir "$fresh_root"
 run_bootstrap "$fresh_root" >"$temporary/first.out"
 [ -d "$fresh_root/lapis-notes/.jj" ] || fail "fresh clone did not initialize JJ"
+for destination in lapis-maintenance lapis-plugin-terminal; do
+  [ -d "$fresh_root/$destination/.jj" ] || fail "$destination clone did not initialize JJ"
+  grep -Fxq "git@github.com:lapismd/$destination.git" "$fresh_root/$destination/.fake-origin" ||
+    fail "$destination clone used the wrong remote"
+done
 cmp "$repo_root/templates/workspace/AGENTS.md" "$fresh_root/AGENTS.md" || fail "AGENTS template mismatch"
 cmp "$repo_root/templates/workspace/.cursor/rules/commit-after-change.mdc" \
   "$fresh_root/.cursor/rules/commit-after-change.mdc" || fail "Cursor template mismatch"
-grep -q 'summary: cloned=22 verified=0 initialized=22 failed=0' "$temporary/first.out" ||
+grep -q 'summary: cloned=24 verified=0 initialized=24 failed=0' "$temporary/first.out" ||
   fail "unexpected first-run summary"
 
 printf 'https://github.com/lapismd/lapis-notes.git\n' >"$fresh_root/lapis-notes/.fake-origin"
 run_bootstrap "$fresh_root" >"$temporary/second.out"
-grep -q 'summary: cloned=0 verified=22 initialized=0 failed=0' "$temporary/second.out" ||
+grep -q 'summary: cloned=0 verified=24 initialized=0 failed=0' "$temporary/second.out" ||
   fail "rerun was not idempotent"
 
 conflict_root=$temporary/conflict
