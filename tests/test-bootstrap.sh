@@ -82,18 +82,17 @@ if printf '%s\n' "$all_list_output" | grep -q '^lapismd/lapis-plugin-cv-roles[[:
   fail "retired CV Roles plugin remains in the inventory"
 fi
 for repository in stevejuma/jujutsu-skills stevejuma/jj-sample-repo; do
-  trunk=main
-  [ "$repository" != stevejuma/jj-sample-repo ] || trunk=trunk
-  printf '%s\n' "$all_list_output" | awk -F '\t' \
-    -v repository="$repository" -v destination="${repository#*/}" -v trunk="$trunk" '
-    $1 == repository && $2 == destination && $3 == "all" && $4 == trunk { found = 1 }
+  if printf '%s\n' "$all_list_output" | awk -F '\t' -v repository="$repository" '
+    $1 == repository { found = 1 }
     END { exit(!found) }
-  ' || fail "$repository missing from the all profile or has the wrong trunk"
+  '; then
+    fail "$repository should be excluded from the inventory"
+  fi
 done
 active_count=$(printf '%s\n' "$list_output" | awk 'NR > 1 { count++ } END { print count + 0 }')
 [ "$active_count" -eq 24 ] || fail "active list count was $active_count"
 all_count=$(cd "$repo_root" && ./bootstrap.sh --profile all --list | awk 'NR > 1 { count++ } END { print count + 0 }')
-[ "$all_count" -eq 34 ] || fail "all list count was $all_count"
+[ "$all_count" -eq 32 ] || fail "all list count was $all_count"
 
 dry_root=$temporary/dry
 mkdir "$dry_root"
@@ -118,8 +117,8 @@ for destination in lapis-maintenance lapis-plugin-terminal lapis-website; do
   grep -Fxq "git@github.com:lapismd/$destination.git" "$fresh_root/$destination/.fake-origin" ||
     fail "$destination clone used the wrong remote"
 done
-[ ! -e "$fresh_root/jujutsu-skills" ] || fail "active profile cloned optional skills"
-[ ! -e "$fresh_root/jj-sample-repo" ] || fail "active profile cloned the optional sample"
+[ ! -e "$fresh_root/jujutsu-skills" ] || fail "active profile cloned excluded skills"
+[ ! -e "$fresh_root/jj-sample-repo" ] || fail "active profile cloned the excluded sample"
 cmp "$repo_root/templates/workspace/AGENTS.md" "$fresh_root/AGENTS.md" || fail "AGENTS template mismatch"
 cmp "$repo_root/templates/workspace/.cursor/rules/commit-after-change.mdc" \
   "$fresh_root/.cursor/rules/commit-after-change.mdc" || fail "Cursor template mismatch"
@@ -132,12 +131,10 @@ grep -q 'summary: cloned=0 verified=24 initialized=0 failed=0' "$temporary/secon
   fail "rerun was not idempotent"
 
 run_bootstrap "$fresh_root" --profile all >"$temporary/all.out"
-grep -q 'summary: cloned=10 verified=24 initialized=10 failed=0' "$temporary/all.out" ||
+grep -q 'summary: cloned=8 verified=24 initialized=8 failed=0' "$temporary/all.out" ||
   fail "unexpected all-profile summary"
 for destination in jujutsu-skills jj-sample-repo; do
-  [ -d "$fresh_root/$destination/.jj" ] || fail "$destination clone did not initialize JJ"
-  grep -Fxq "git@github.com:stevejuma/$destination.git" "$fresh_root/$destination/.fake-origin" ||
-    fail "$destination clone used the wrong remote"
+  [ ! -e "$fresh_root/$destination" ] || fail "all profile cloned excluded $destination"
 done
 
 conflict_root=$temporary/conflict

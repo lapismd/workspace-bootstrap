@@ -32,5 +32,3 @@ lapismd/nostr-auth	nostr-auth	all	main
 lapismd/nostr-relay	nostr-relay	all	main
 lapismd/relay-forge-sandbox	relay-forge-sandbox	all	main
 lapismd/terminal-host	terminal-host	all	main
-stevejuma/jujutsu-skills	jujutsu-skills	all	main
-stevejuma/jj-sample-repo	jj-sample-repo	all	trunk

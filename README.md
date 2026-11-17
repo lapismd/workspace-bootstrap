@@ -34,10 +34,9 @@ Run every command below from `workspace-bootstrap`.
 ```
 
 The default `active` profile contains 24 application, website, maintenance,
-framework, plugin, agent, and JJ repositories. The `all` profile contains 34
+framework, plugin, agent, and JJ repositories. The `all` profile contains 32
 repositories, adding the organization, automation, CI, Homebrew, Nostr, sandbox,
-and deprecated Terminal Host repositories, plus the Jujutsu skills and sample
-repositories:
+and deprecated Terminal Host repositories:
 
 ```sh
 ./bootstrap.sh --profile all
@@ -57,10 +56,8 @@ GitHub remote identifies the expected repository, whether that remote uses SSH
 or HTTPS and regardless of its name. Existing remotes are never rewritten.
 
 Both profiles include `lapis-maintenance`, `lapis-plugin-terminal`, and
-`lapis-website`. The `all` profile also includes `stevejuma/jujutsu-skills`
-and `stevejuma/jj-sample-repo`; the sample repository uses `trunk` rather than
-`main`. The bootstrap repository itself is the checkout these commands run from
-and is not repeated in the manifest.
+`lapis-website`. The bootstrap repository itself is the checkout these commands
+run from and is not repeated in the manifest.
 
 Refresh the main workspace's shared `AGENTS.md` after template changes:
 
@@ -90,7 +87,8 @@ Inventory reviewed against the live LapisMD GitHub catalog and local sibling
 remotes on 2026-11-17. Every hosted organization repository is represented,
 apart from this bootstrap checkout itself. The retired `lapis-plugin-cv-roles`
 repository is excluded. Duplicate clones and linked JJ workspaces are not
-separate inventory entries.
+separate inventory entries. The local `jujutsu-skills` and `jj-sample-repo`
+repositories are outside the bootstrap scope and are excluded from both profiles.
 
 The following local projects are deliberately excluded because they have no
 hosted clone remote: `community-local`, `jj-desktop`, `jj-checkpoint`, `jj-nostr`,
