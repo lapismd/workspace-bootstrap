@@ -78,7 +78,7 @@ wb_validate_manifest() {
       expected_active = ENVIRON["WB_EXPECT_ACTIVE"] + 0
       expected_all = ENVIRON["WB_EXPECT_ALL"] + 0
       if (expected_active == 0) expected_active = 24
-      if (expected_all == 0) expected_all = 32
+      if (expected_all == 0) expected_all = 34
       if (active != expected_active) {
         printf "manifest: expected %d active entries, found %d\n", expected_active, active > "/dev/stderr"
         errors++

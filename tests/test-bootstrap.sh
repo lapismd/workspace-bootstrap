@@ -70,17 +70,30 @@ run_bootstrap() {
 }
 
 list_output=$(cd "$repo_root" && ./bootstrap.sh --list)
-for repository in lapismd/lapis-maintenance lapismd/lapis-plugin-terminal; do
+for repository in lapismd/lapis-maintenance lapismd/lapis-plugin-terminal lapismd/lapis-website; do
   printf '%s\n' "$list_output" | awk -F '\t' \
     -v repository="$repository" -v destination="${repository#*/}" '
     $1 == repository && $2 == destination && $3 == "active,all" && $4 == "main" { found = 1 }
     END { exit(!found) }
   ' || fail "$repository missing from the active profile"
 done
+all_list_output=$(cd "$repo_root" && ./bootstrap.sh --profile all --list)
+if printf '%s\n' "$all_list_output" | grep -q '^lapismd/lapis-plugin-cv-roles[[:space:]]'; then
+  fail "retired CV Roles plugin remains in the inventory"
+fi
+for repository in stevejuma/jujutsu-skills stevejuma/jj-sample-repo; do
+  trunk=main
+  [ "$repository" != stevejuma/jj-sample-repo ] || trunk=trunk
+  printf '%s\n' "$all_list_output" | awk -F '\t' \
+    -v repository="$repository" -v destination="${repository#*/}" -v trunk="$trunk" '
+    $1 == repository && $2 == destination && $3 == "all" && $4 == trunk { found = 1 }
+    END { exit(!found) }
+  ' || fail "$repository missing from the all profile or has the wrong trunk"
+done
 active_count=$(printf '%s\n' "$list_output" | awk 'NR > 1 { count++ } END { print count + 0 }')
 [ "$active_count" -eq 24 ] || fail "active list count was $active_count"
 all_count=$(cd "$repo_root" && ./bootstrap.sh --profile all --list | awk 'NR > 1 { count++ } END { print count + 0 }')
-[ "$all_count" -eq 32 ] || fail "all list count was $all_count"
+[ "$all_count" -eq 34 ] || fail "all list count was $all_count"
 
 dry_root=$temporary/dry
 mkdir "$dry_root"
@@ -100,11 +113,13 @@ fresh_root=$temporary/fresh
 mkdir "$fresh_root"
 run_bootstrap "$fresh_root" >"$temporary/first.out"
 [ -d "$fresh_root/lapis-notes/.jj" ] || fail "fresh clone did not initialize JJ"
-for destination in lapis-maintenance lapis-plugin-terminal; do
+for destination in lapis-maintenance lapis-plugin-terminal lapis-website; do
   [ -d "$fresh_root/$destination/.jj" ] || fail "$destination clone did not initialize JJ"
   grep -Fxq "git@github.com:lapismd/$destination.git" "$fresh_root/$destination/.fake-origin" ||
     fail "$destination clone used the wrong remote"
 done
+[ ! -e "$fresh_root/jujutsu-skills" ] || fail "active profile cloned optional skills"
+[ ! -e "$fresh_root/jj-sample-repo" ] || fail "active profile cloned the optional sample"
 cmp "$repo_root/templates/workspace/AGENTS.md" "$fresh_root/AGENTS.md" || fail "AGENTS template mismatch"
 cmp "$repo_root/templates/workspace/.cursor/rules/commit-after-change.mdc" \
   "$fresh_root/.cursor/rules/commit-after-change.mdc" || fail "Cursor template mismatch"
@@ -115,6 +130,15 @@ printf 'https://github.com/lapismd/lapis-notes.git\n' >"$fresh_root/lapis-notes/
 run_bootstrap "$fresh_root" >"$temporary/second.out"
 grep -q 'summary: cloned=0 verified=24 initialized=0 failed=0' "$temporary/second.out" ||
   fail "rerun was not idempotent"
+
+run_bootstrap "$fresh_root" --profile all >"$temporary/all.out"
+grep -q 'summary: cloned=10 verified=24 initialized=10 failed=0' "$temporary/all.out" ||
+  fail "unexpected all-profile summary"
+for destination in jujutsu-skills jj-sample-repo; do
+  [ -d "$fresh_root/$destination/.jj" ] || fail "$destination clone did not initialize JJ"
+  grep -Fxq "git@github.com:stevejuma/$destination.git" "$fresh_root/$destination/.fake-origin" ||
+    fail "$destination clone used the wrong remote"
+done
 
 conflict_root=$temporary/conflict
 mkdir "$conflict_root"
