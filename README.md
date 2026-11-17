@@ -62,6 +62,24 @@ and `stevejuma/jj-sample-repo`; the sample repository uses `trunk` rather than
 `main`. The bootstrap repository itself is the checkout these commands run from
 and is not repeated in the manifest.
 
+Refresh the main workspace's shared `AGENTS.md` after template changes:
+
+```sh
+./update-guidance.sh
+./update-guidance.sh --apply
+```
+
+The updater defaults to the parent of this checkout, works from any current
+directory, and accepts `--target-root /absolute/existing/directory`. Preview
+shows the diff. Applying replaces the shared file with the tracked template and
+preserves differing existing content in `AGENTS.md.backup.*`; identical content
+is left alone. It rejects symlinks and targets inside the bootstrap source
+repository. It updates only shared `AGENTS.md`. Normal bootstrap still refuses
+to overwrite differing configuration.
+
+The shared guidance permits command-scoped signing bypasses when 1Password
+delays or blocks a Jujutsu commit, without changing persistent signing settings.
+
 Bootstrap installs the portable root templates at `../AGENTS.md` and
 `../.cursor/rules/commit-after-change.mdc`. An existing identical file is
 accepted; a difference fails before any installation or clone. There is no
@@ -122,5 +140,5 @@ review.
 ```
 
 Verification checks shell syntax, ShellCheck when installed, manifest shape and
-profile counts, deterministic command simulations, and real temporary Git/JJ
-behavior. It never contacts GitHub.
+profile counts, deterministic command simulations, guidance updates and backups,
+and real temporary Git/JJ behavior. It never contacts GitHub.

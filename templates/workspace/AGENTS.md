@@ -46,7 +46,6 @@ parent file into a child repository.
 | `design-core`                  | `@lapismd/design-core`                                                                                                                                                                         | Lapis                                                                                               | Design Core exports its main package from `src`, so run its relevant checks and restart/revalidate Lapis; there is no main-package build step.                                                                                                                       |
 | `mira-mde`                     | `@lapismd/mira`, `@lapismd/mira-editor`, `@lapismd/mira-plugin-ai`, `@lapismd/mira-plugin-mermaid`, `@lapismd/mira-react`, and `@lapismd/mira-vanilla`; private Solid/Vue adapters are planned | Design Core, Lapis, and first-party plugins                                                         | Run root `pnpm build`; these package exports resolve through `dist`. Then validate Lapis.                                                                                                                                                                            |
 | `lapis-notes`                  | `@lapis-notes/api`, `@lapis-notes/ui`, `@lapis-notes/workspace`, and `@lapis-notes/markdown`                                                                                                   | Lapis applications and catalog                                                                      | Run root `pnpm build` for internal `dist` consumers, followed by the relevant application/catalog checks.                                                                                                                                                            |
-| `lapis-plugin-cv-roles`        | `@lapis-notes/lapis-plugin-cv-roles`                                                                                                                                                           | Lapis desktop, web, and real-App catalog                                                            | Run `pnpm build` plus the standalone spec, check, test, publint, Storybook interaction/axe, and static-build lanes. Then restart and validate Lapis against the rebuilt public `dist` exports.                                                                       |
 | `ai-host`                      | `@lapismd/ai-host`                                                                                                                                                                             | Lapis desktop, web, Storybook attach, and smoke scripts                                             | Run `pnpm build`, `pnpm spec:check`, `pnpm check`, and `pnpm test`. Then restart and validate Lapis against the public exports.                                                                                                                                      |
 | `terminal-host`                | `@lapismd/terminal-host`                                                                                                                                                                       | Lapis desktop, web, and local `lapis-terminal-host serve`                                           | Run `pnpm build`, `pnpm spec:check`, `pnpm check`, and `pnpm test`. Then restart and validate Lapis against the public exports.                                                                                                                                      |
 | `lapis-plugin-terminal`        | `@lapis-notes/lapis-plugin-terminal`                                                                                                                                                           | Lapis desktop and web                                                                               | Run `pnpm build` plus the standalone spec, check, test, and publint lanes. Then restart and validate Lapis against the rebuilt public `dist` exports.                                                                                                                |
@@ -169,9 +168,26 @@ For a new sibling repository, add its ownership/build entry here.
 ## Standing commit request
 
 This is a standing request for every repository and package under this
-workspace root. After each verified slice, commit in the owning repository
-without waiting for the user to ask. Leave unrelated work, secrets, local
-loader/editor configuration, and this shared file uncommitted.
+workspace root, including every `lapis-notes` workspace package. After each
+verified slice, commit in the owning repository without waiting for the user
+to ask. Leave unrelated work, secrets, local loader/editor configuration, and
+this shared file uncommitted.
 
 If the owning repository has overlapping uncommitted work that prevents a safe
 change, report the conflict and stop. Do not substitute a consumer workaround.
+
+## 1Password signing delays
+
+If 1Password Git signing delays, hangs, or fails during a commit, bypass signing
+and continue committing with Jujutsu. Stop the delayed signing attempt, inspect
+`jj --no-pager st` and the latest change to avoid creating a duplicate commit,
+then retry any unfinished commit with:
+
+```sh
+jj --config signing.behavior=drop commit -m "Describe the verified change"
+```
+
+Do not wait repeatedly for 1Password or switch to raw Git commits. Use the
+command-scoped override; leave persistent signing configuration unchanged.
+If `jj git push` also stalls while signing through 1Password, retry that push
+with `jj --config git.sign-on-push=false git push --bookmark <bookmark>`.
