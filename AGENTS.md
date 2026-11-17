@@ -5,6 +5,10 @@ and conservative Jujutsu workspace cleanup. It does not own application source,
 dependency installation, builds, publication, or deployment.
 
 - Use Jujutsu and preserve unrelated work. Commit every verified slice.
+- For pull requests, use the repository's established branch family, such as
+  `automation/*`, `fix/*`, or another owner-defined prefix. Do not use
+  `codex/*`: organization policy does not schedule required GitHub Actions for
+  that prefix, leaving pull requests without mergeability or check evidence.
 - Keep scripts POSIX `sh`; support macOS and Linux without Bash-only features.
 - Bootstrap may clone and initialize colocated JJ repositories, but must never
   fetch, pull, reset, rewrite remotes, install dependencies, or overwrite
