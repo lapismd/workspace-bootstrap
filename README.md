@@ -33,10 +33,10 @@ Run every command below from `workspace-bootstrap`.
 ./bootstrap.sh
 ```
 
-The default `active` profile contains 24 application, maintenance, framework,
-plugin, agent, and JJ repositories. The `all` profile contains 32 repositories,
-adding the organization, automation, CI, Homebrew, Nostr, sandbox, and deprecated
-Terminal Host repositories:
+The default `active` profile contains 24 application, website, maintenance,
+framework, plugin, agent, and JJ repositories. The `all` profile contains 32
+repositories, adding the organization, automation, CI, Homebrew, Nostr, sandbox,
+and deprecated Terminal Host repositories:
 
 ```sh
 ./bootstrap.sh --profile all
@@ -55,9 +55,27 @@ discovered implicitly. Existing checkouts are accepted when any configured
 GitHub remote identifies the expected repository, whether that remote uses SSH
 or HTTPS and regardless of its name. Existing remotes are never rewritten.
 
-Both profiles include `lapis-maintenance` and `lapis-plugin-terminal`. The
-bootstrap repository itself is the checkout these commands run from and is not
-repeated in the manifest.
+Both profiles include `lapis-maintenance`, `lapis-plugin-terminal`, and
+`lapis-website`. The bootstrap repository itself is the checkout these commands
+run from and is not repeated in the manifest.
+
+Refresh the main workspace's shared `AGENTS.md` after template changes:
+
+```sh
+./update-guidance.sh
+./update-guidance.sh --apply
+```
+
+The updater defaults to the parent of this checkout, works from any current
+directory, and accepts `--target-root /absolute/existing/directory`. Preview
+shows the diff. Applying replaces the shared file with the tracked template and
+preserves differing existing content in `AGENTS.md.backup.*`; identical content
+is left alone. It rejects symlinks and targets inside the bootstrap source
+repository. It updates only shared `AGENTS.md`. Normal bootstrap still refuses
+to overwrite differing configuration.
+
+The shared guidance permits command-scoped signing bypasses when 1Password
+delays or blocks a Jujutsu commit, without changing persistent signing settings.
 
 Bootstrap installs the portable root templates at `../AGENTS.md` and
 `../.cursor/rules/commit-after-change.mdc`. An existing identical file is
@@ -65,9 +83,16 @@ accepted; a difference fails before any installation or clone. There is no
 tracked `.codex` configuration in the source workspace: the root `AGENTS.md` is
 the Codex configuration, and app-managed workspace directories are not created.
 
-The following local projects are documented but deliberately excluded because
-they have no hosted clone remote: `jj-desktop`, `jj-checkpoint`, `jj-nostr`,
-`lapis-plugin-nostr-sync`, `lapis-website`, and `nostr-agent-controller`.
+Inventory reviewed against the live LapisMD GitHub catalog and local sibling
+remotes on 2026-11-17. Every hosted organization repository is represented,
+apart from this bootstrap checkout itself. The retired `lapis-plugin-cv-roles`
+repository is excluded. Duplicate clones and linked JJ workspaces are not
+separate inventory entries. The local `jujutsu-skills` and `jj-sample-repo`
+repositories are outside the bootstrap scope and are excluded from both profiles.
+
+The following local projects are deliberately excluded because they have no
+hosted clone remote: `community-local`, `jj-desktop`, `jj-checkpoint`, `jj-nostr`,
+`lapis-plugin-nostr-sync`, and `nostr-agent-controller`.
 
 ## Clean integrated JJ workspaces
 
@@ -113,5 +138,5 @@ review.
 ```
 
 Verification checks shell syntax, ShellCheck when installed, manifest shape and
-profile counts, deterministic command simulations, and real temporary Git/JJ
-behavior. It never contacts GitHub.
+profile counts, deterministic command simulations, guidance updates and backups,
+and real temporary Git/JJ behavior. It never contacts GitHub.

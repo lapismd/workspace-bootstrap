@@ -9,6 +9,8 @@ dependency installation, builds, publication, or deployment.
 - Bootstrap may clone and initialize colocated JJ repositories, but must never
   fetch, pull, reset, rewrite remotes, install dependencies, or overwrite
   differing root configuration.
+- `update-guidance.sh` is the explicit exception for refreshing shared
+  `AGENTS.md`: preview by default, require `--apply`, and back up existing content.
 - Cleanup defaults to preview. Only direct sibling workspaces with exact native
   ancestry may be quarantined. Never infer squash-merge equivalence.
 - Quarantine preserves complete directories and workspace registrations.
